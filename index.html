@@ -41,6 +41,38 @@ nav .nav-close{display:none}
 @media(max-width:480px){.polaroid-card{padding:6px}.polaroid-grid{gap:8px}.contact .instagram-contact{font-size:21px}}
 @media(prefers-reduced-motion:reduce){nav{transition:none!important}}
 
+
+/* Refinements: stable glass menu, compact measurement rows, interactive focus cards */
+@media(max-width:820px){
+  header{z-index:150}
+  nav#nav{
+    position:fixed!important;top:12px!important;left:12px!important;right:12px!important;bottom:auto!important;
+    width:auto!important;height:auto!important;min-height:min(78svh,560px);
+    padding:76px 24px 28px!important;gap:0!important;
+    border:1px solid rgba(255,255,255,.34)!important;border-radius:22px!important;
+    background:rgba(248,246,241,.78)!important;
+    -webkit-backdrop-filter:blur(24px) saturate(155%)!important;backdrop-filter:blur(24px) saturate(155%)!important;
+    box-shadow:0 24px 80px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.6)!important;
+    display:flex!important;flex-direction:column;align-items:stretch!important;justify-content:center!important;
+    opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-10px) scale(.985);
+    transition:opacity .22s ease,transform .22s ease,visibility .22s ease!important;
+    overflow:auto;z-index:160!important;
+  }
+  nav#nav.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1)}
+  nav#nav a{margin:0!important;padding:15px 4px!important;border-bottom:1px solid rgba(17,17,16,.12);font-size:13px!important;letter-spacing:.16em;text-align:center}
+  nav#nav a:last-of-type{border-bottom:0}
+  nav .nav-close{z-index:2;position:absolute!important;top:12px!important;right:12px!important}
+  body.menu-open{overflow:hidden}
+  .measurements{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px 18px!important}
+  .measure-row{min-width:0;align-items:flex-start;flex-direction:column;gap:2px;font-size:12px}
+  .measure-row strong{overflow-wrap:anywhere}
+}
+.focus .focus-card{display:block;width:100%;min-width:0;text-align:left;color:inherit;background:transparent;border:0;border-top:1px solid transparent;padding:10px 0 14px;cursor:pointer;transition:transform .25s ease,border-color .25s ease,background .25s ease}
+.focus .focus-card:hover,.focus .focus-card:focus-visible{transform:translateY(-5px);border-top-color:var(--beige);background:linear-gradient(180deg,rgba(216,201,181,.18),transparent 75%);outline:none}
+.focus .focus-card:hover h3,.focus .focus-card:focus-visible h3{color:#8b7456}
+.focus .focus-card:focus-visible{outline:1px solid var(--beige);outline-offset:4px}
+@media(max-width:480px){.measurements{grid-template-columns:repeat(2,minmax(0,1fr))!important}.measure-row{font-size:11px}}
+
 </style>
 </head>
 <body>
@@ -181,7 +213,7 @@ function renderSite() {
   $("#ig").textContent = "Instagram";
   $("#instagram-contact").href = "https://www.instagram.com/arjoo.__/";
   $("#filters").innerHTML = ["All", ...CATS].map(c => `<button aria-pressed="${c === filter}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
-  $("#focus-grid").innerHTML = FOCUS.map((f, i) => `<div><span>0${i + 1}</span><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join("");
+  $("#focus-grid").innerHTML = FOCUS.map((f, i) => `<button type="button" class="focus-card" data-focus-cat="${esc(f[0])}"><span>0${i + 1}</span><h3>${esc(f[0])}</h3><p>${esc(f[1])}</p></button>`).join("");
   renderGrid();
 }
 
@@ -204,6 +236,15 @@ function closeLb() { $("#lb").classList.remove("open"); document.body.style.over
 function step(d) { if(!list.length)return; cur = (cur + d + list.length) % list.length; showLb(); if(navigator.vibrate)navigator.vibrate(8); }
 
 document.addEventListener("click", e => {
+  const focusCard = e.target.closest("[data-focus-cat]");
+  if (focusCard) {
+    const category = focusCard.dataset.focusCat;
+    filter = CATS.includes(category) ? category : "All";
+    renderGrid();
+    $("#work").scrollIntoView({behavior:"smooth", block:"start"});
+    if (navigator.vibrate) navigator.vibrate(8);
+    return;
+  }
   const c = e.target.closest("[data-c]"); if (c) { filter = c.dataset.c; renderGrid(); return; }
   const t = e.target.closest(".tile"); if (t) { openLb(+t.dataset.i); return; }
   if (e.target.id === "lb") closeLb();
@@ -221,7 +262,8 @@ document.addEventListener("keydown", e => {
 });
 function closeMenu(){ $("nav").classList.remove("open"); $(".menu-btn").setAttribute("aria-expanded", "false"); document.body.classList.remove("menu-open"); }
 $(".menu-btn").addEventListener("click", e => {
-  const open = $("nav").classList.toggle("open");
+  const open = !$("nav").classList.contains("open");
+  $("nav").classList.toggle("open", open);
   e.currentTarget.setAttribute("aria-expanded", String(open));
   document.body.classList.toggle("menu-open", open);
 });
