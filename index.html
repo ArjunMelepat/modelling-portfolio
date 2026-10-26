@@ -267,6 +267,10 @@ function buildAdmin() {
      <button class="btn">Save site text</button>`;
   $("#addCat").innerHTML = CATS.map(c => `<option>${esc(c)}</option>`).join("");
   renderAdminPhotos();
+  // Build the Model card controls whenever the authenticated admin dashboard opens.
+  // Without these calls, the model measurements form and four photo upload controls stay empty.
+  buildMeasurements();
+  buildPolaroidAdmin();
 }
 
 function renderAdminPhotos() {
