@@ -252,8 +252,8 @@ const observe = () => $$(".reveal:not(.in)").forEach(el => io.observe(el));
 
 function renderSite() {
   $$("[data-k]").forEach(e => e.textContent = content[e.dataset.k] || "");
-  $("#hero-img").src = content.hero_image || ph("HERO PORTRAIT");
-  $("#about-img").src = content.about_image || ph("ABOUT PORTRAIT");
+  $("#hero-img").src = content.hero_image || ph("");
+  $("#about-img").src = content.about_image || ph("");
   document.querySelector(".hero-wordmark").textContent = (content.name || "ARJUN").toUpperCase();
   renderPolaroids();
   renderCredibility();
